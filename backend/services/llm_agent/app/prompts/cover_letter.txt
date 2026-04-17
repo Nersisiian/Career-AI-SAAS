@@ -1,0 +1,20 @@
+You are an expert career coach and professional writer. Write a compelling cover letter for the following job application.
+
+Job Title: {job_title}
+Company: {company}
+Job Description: {job_description}
+
+Candidate Background: {resume_context}
+
+Tone: {tone}
+
+Format: First line should be "Subject: [Your Subject Line]". Then a blank line, then the cover letter body.
+
+The cover letter should:
+- Be tailored specifically to the job description
+- Highlight relevant skills and experiences from the candidate's background
+- Show enthusiasm for the company's mission
+- Be concise (250-350 words)
+- End with a professional closing
+
+Write the cover letter now:

@@ -1,0 +1,185 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: career_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-career_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-career_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-career_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-career_user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - career_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: career_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - career_network
+
+  user-service:
+    build:
+      context: ./backend/services/user_service
+      dockerfile: Dockerfile
+    container_name: career_user_service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-career_user}:${POSTGRES_PASSWORD:-career_pass}@postgres:5432/${POSTGRES_DB:-career_db}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:8501","http://localhost:3000"]}
+      UPLOAD_DIR: /app/uploads
+      ML_SERVICE_URL: http://ml-service:8000
+      LLM_SERVICE_URL: http://llm-agent:8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - career_network
+
+  ml-service:
+    build:
+      context: ./backend/services/ml_service
+      dockerfile: Dockerfile
+    container_name: career_ml_service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-career_user}:${POSTGRES_PASSWORD:-career_pass}@postgres:5432/${POSTGRES_DB:-career_db}
+      REDIS_URL: redis://redis:6379/1
+      MODEL_PATH: /app/models
+      FAISS_INDEX_PATH: /app/data/job_index.faiss
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - career_network
+
+  llm-agent:
+    build:
+      context: ./backend/services/llm_agent
+      dockerfile: Dockerfile
+    container_name: career_llm_agent
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      LLM_MODEL: ${LLM_MODEL:-gpt-3.5-turbo}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-career_user}:${POSTGRES_PASSWORD:-career_pass}@postgres:5432/${POSTGRES_DB:-career_db}
+      REDIS_URL: redis://redis:6379/2
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      CHROMA_PERSIST_DIR: /app/chroma_db
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./chroma_db:/app/chroma_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - career_network
+
+  scraper-service:
+    build:
+      context: ./backend/services/scraper_service
+      dockerfile: Dockerfile
+    container_name: career_scraper_service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-career_user}:${POSTGRES_PASSWORD:-career_pass}@postgres:5432/${POSTGRES_DB:-career_db}
+      REDIS_URL: redis://redis:6379/3
+      ENABLE_SCHEDULER: "true"
+      SCRAPE_INTERVAL_HOURS: "24"
+    ports:
+      - "8004:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - career_network
+
+  analytics-service:
+    build:
+      context: ./backend/services/analytics_service
+      dockerfile: Dockerfile
+    container_name: career_analytics_service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-career_user}:${POSTGRES_PASSWORD:-career_pass}@postgres:5432/${POSTGRES_DB:-career_db}
+    ports:
+      - "8005:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - career_network
+
+  frontend:
+    build:
+      context: ./frontend/streamlit_app
+      dockerfile: Dockerfile
+    container_name: career_frontend
+    environment:
+      API_BASE_URL: http://user-service:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - user-service
+      - ml-service
+      - llm-agent
+    networks:
+      - career_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: career_nginx
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
+      - ml-service
+      - llm-agent
+      - frontend
+    networks:
+      - career_network
+
+networks:
+  career_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

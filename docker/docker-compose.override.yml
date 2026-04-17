@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  user-service:
+    volumes:
+      - ../backend/services/user_service/app:/app/app
+    environment:
+      - ENVIRONMENT=development
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  ml-service:
+    volumes:
+      - ../backend/services/ml_service/app:/app/app
+      - ../backend/shared:/app/shared
+    environment:
+      - ENVIRONMENT=development
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  llm-agent:
+    volumes:
+      - ../backend/services/llm_agent/app:/app/app
+    environment:
+      - ENVIRONMENT=development
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  scraper-service:
+    volumes:
+      - ../backend/services/scraper_service/app:/app/app
+    environment:
+      - ENVIRONMENT=development
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    volumes:
+      - ../frontend/streamlit_app:/app
+    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0 --server.runOnSave=true

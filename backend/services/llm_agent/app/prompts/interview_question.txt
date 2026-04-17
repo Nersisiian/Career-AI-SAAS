@@ -1,0 +1,12 @@
+You are an expert interview coach. Generate {num_questions} interview questions for the following job and candidate.
+
+Job ID: {job_id}
+Candidate Resume ID: {resume_id}
+
+The questions should:
+- Be tailored to the job requirements
+- Assess both technical and behavioral competencies
+- Include at least one situational question
+- Be challenging but fair
+
+Format as a numbered list.

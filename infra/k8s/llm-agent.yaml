@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-agent
+  namespace: ai-career-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: llm-agent
+  template:
+    metadata:
+      labels:
+        app: llm-agent
+    spec:
+      containers:
+      - name: llm-agent
+        image: ${ECR_REGISTRY}/ai-career-agent/llm-agent:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llm-secret
+              key: api-key
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: url
+        - name: REDIS_URL
+          value: "redis://redis-service:6379/2"
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: secret-key
+        - name: CHROMA_PERSIST_DIR
+          value: "/app/chroma_db"
+        volumeMounts:
+        - name: chroma-data
+          mountPath: /app/chroma_db
+      volumes:
+      - name: chroma-data
+        persistentVolumeClaim:
+          claimName: chroma-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-agent
+  namespace: ai-career-agent
+spec:
+  selector:
+    app: llm-agent
+  ports:
+    - port: 80
+      targetPort: 8000
