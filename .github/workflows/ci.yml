@@ -1,4 +1,4 @@
-name: CI Pipeline
+﻿name: CI Pipeline
 
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r backend/services/user_service/requirements.txt
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov requests httpx
 
       - name: Run tests
         env:
