@@ -1,36 +1,53 @@
-# AI Career Agent - Intelligent Job Search Platform
+# 🧠 AI Career Agent – Intelligent Job Search SaaS
 
-A full-stack AI-powered SaaS that helps job seekers find matching jobs, generate cover letters, and prepare for interviews.
+[![CI Pipeline](https://github.com/Nersisiian/Career-AI-SAAS/actions/workflows/ci.yml/badge.svg)](https://github.com/Nersisiian/Career-AI-SAAS/actions/workflows/ci.yml)
 
-## Features
-- Resume upload and skill extraction
-- Job scraping from multiple sources
-- ML-powered job matching and ranking
-- AI cover letter generation
-- Interview simulation with feedback
-- Career gap analysis
+**AI Career Agent** – это полнофункциональная SaaS-платформа, которая помогает соискателям автоматизировать поиск работы с помощью искусственного интеллекта. Сервис анализирует резюме, находит подходящие вакансии, генерирует персонализированные сопроводительные письма и симулирует собеседования.
 
-## Quick Start
+---
 
-1. Clone the repository
-2. Copy `.env.example` to `.env` and add your OpenAI API key
-3. Run `docker-compose -f docker/docker-compose.yml up --build`
-4. Access the app at http://localhost:8501
+## 🚀 Возможности
 
-## Architecture
-Microservices architecture with FastAPI, PostgreSQL, Redis, FAISS vector search, and LangChain agents.
+- 📄 **Загрузка и анализ резюме** – извлечение навыков, опыта, образования с помощью NLP.
+- 🔍 **Поиск вакансий** – скрапинг с популярных досок объявлений (симулированный).
+- 🎯 **ML‑ранжирование** – подбор вакансий на основе эмбеддингов и XGBoost с учётом фидбека.
+- ✍️ **AI‑генерация сопроводительных писем** – индивидуально под каждую вакансию (OpenAI).
+- 🎤 **Симуляция собеседований** – вопросы с оценкой ответов.
+- 📊 **Анализ карьерных пробелов** – рекомендации по развитию.
+- 🧠 **Самообучение** – улучшение рекомендаций на основе действий пользователя.
 
-## Services
-- User Service (auth, resume management)
-- ML Service (embeddings, matching, ranking)
-- LLM Agent Service (cover letters, interviews)
-- Scraper Service (job collection)
-- Analytics Service (feedback tracking)
+---
 
-## Tech Stack
-- Backend: FastAPI, SQLAlchemy, Pydantic
-- ML: Sentence-Transformers, FAISS, XGBoost
-- LLM: OpenAI GPT, LangChain
-- Database: PostgreSQL, Redis
-- Frontend: Streamlit
-- Deployment: Docker, Nginx
+## 🏗️ Архитектура
+
+Проект построен по микросервисной архитектуре:
+
+| Сервис               | Порт  | Технологии                                |
+|----------------------|-------|--------------------------------------------|
+| `user-service`       | 8001  | FastAPI, PostgreSQL, Redis, JWT            |
+| `ml-service`         | 8002  | FastAPI, Sentence‑Transformers, FAISS, XGBoost |
+| `llm-agent`          | 8003  | FastAPI, LangChain, OpenAI, ChromaDB       |
+| `scraper-service`    | 8004  | FastAPI, BeautifulSoup, APScheduler        |
+| `analytics-service`  | 8005  | FastAPI, PostgreSQL                        |
+| `frontend`           | 8501  | Streamlit                                  |
+| `nginx`              | 80    | API Gateway / Reverse Proxy                |
+
+Все сервисы упакованы в Docker и управляются через `docker-compose`.
+
+---
+
+## 📦 Требования
+
+- **Docker** и **Docker Compose** (версия 2+)
+- OpenAI API ключ (для LLM‑функций)
+- 4+ ГБ свободной оперативной памяти
+
+---
+
+## ⚡ Быстрый старт
+
+### 1. Клонирование репозитория
+
+```bash
+git clone https://github.com/Nersisiian/Career-AI-SAAS.git
+cd Career-AI-SAAS
