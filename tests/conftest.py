@@ -4,14 +4,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sys
 
-# Р”РѕР±Р°РІР»СЏРµРј РєРѕСЂРµРЅСЊ РїСЂРѕРµРєС‚Р° РІ sys.path (РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№)
+# Добавляем корень проекта в sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# Импортируем Base из общего модуля (важно – только один раз)
 from backend.services.user_service.app.core.database import Base
+
+# Импортируем модели, чтобы они зарегистрировались в Base.metadata
 from backend.services.user_service.app.models.user import User
 from backend.services.user_service.app.models.resume import Resume
 
-# РСЃРїРѕР»СЊР·СѓРµРј PostgreSQL РёР· РѕРєСЂСѓР¶РµРЅРёСЏ CI (РёР»Рё Р»РѕРєР°Р»СЊРЅС‹Р№ SQLite РґР»СЏ Р±С‹СЃС‚СЂРѕР№ СЂР°Р·СЂР°Р±РѕС‚РєРё)
 TEST_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 
 @pytest.fixture(scope="session")
