@@ -43,6 +43,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+<<<<<<< HEAD
+=======
+          # Устанавливаем зависимости для всех сервисов, которые нужны для тестов
+>>>>>>> 86fc00bb503e9e87cfe9b36b1175188177bf1dc9
           pip install -r backend/services/user_service/requirements.txt
           pip install pytest pytest-cov
 
@@ -51,8 +55,14 @@ jobs:
           DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379/0
           SECRET_KEY: test_secret_key_for_ci
+<<<<<<< HEAD
           PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/backend/services/user_service:${{ github.workspace }}/backend/shared
         run: |
+=======
+          PYTHONPATH: ${{ github.workspace }}/backend/services/user_service:${{ github.workspace }}/backend/shared
+        run: |
+          # Запускаем тесты из корневой папки tests
+>>>>>>> 86fc00bb503e9e87cfe9b36b1175188177bf1dc9
           pytest tests/ -v --cov=backend/services/user_service/app --cov-report=xml
 
       - name: Upload coverage to Codecov (optional)
